@@ -37,7 +37,7 @@ lcd_t static * ll_create_lcd () {
 	lcd->max_x = LCD_WIDTH;
 	lcd->max_y = LCD_HEIGHT;
 	lcd->backlight_state = G15_BRIGHTNESS_MEDIUM;
-	lcd->mkey_state = 0;
+	lcd->mkey_state = G15_LED_M1;
 	lcd->contrast_state = G15_CONTRAST_MEDIUM;
 	lcd->state_changed = 1;
 	lcd->usr_foreground = 0;
@@ -62,7 +62,7 @@ g15daemon_t *ll_lcdlist_init () {
 	masterlist->tail = masterlist->head;
 	masterlist->current = masterlist->head;
 	masterlist->head->lcd = ll_create_lcd();
-	masterlist->head->lcd->mkey_state = 0;
+	masterlist->head->lcd->mkey_state = G15_LED_M1;
 	masterlist->head->lcd->masterlist = masterlist;
 	/* first screen is the clock/menu */
 	masterlist->head->lcd->g15plugin->info = NULL;
@@ -174,4 +174,3 @@ void ll_lcdlist_destroy(g15daemon_t **masterlist) {
 	free(*masterlist);
 	pthread_mutex_destroy(&lcdlist_mutex);
 }
-

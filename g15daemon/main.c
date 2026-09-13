@@ -70,6 +70,33 @@ static unsigned int keyboard_backlight_level(config_section_t *global_cfg) {
 	return level;
 }
 
+static void apply_startup_keyboard_state(g15daemon_t *lcdlist) {
+	int led_result;
+#if defined(LIBG15_VERSION) && LIBG15_VERSION >= 1200
+	int brightness_result;
+#endif
+
+	pthread_mutex_lock(&g15lib_mutex);
+	led_result = setLEDs(G15_LED_M1);
+#if defined(LIBG15_VERSION) && LIBG15_VERSION >= 1200
+	brightness_result = setKBBrightness(lcdlist->kb_backlight_state);
+#endif
+	usleep(5000);
+	led_result = setLEDs(G15_LED_M1);
+#if defined(LIBG15_VERSION) && LIBG15_VERSION >= 1200
+	brightness_result = setKBBrightness(lcdlist->kb_backlight_state);
+#endif
+	pthread_mutex_unlock(&g15lib_mutex);
+
+	if (led_result < 0)
+		g15daemon_log(LOG_WARNING, "Unable to set the initial M1 LED: %d", led_result);
+#if defined(LIBG15_VERSION) && LIBG15_VERSION >= 1200
+	if (brightness_result < 0)
+		g15daemon_log(LOG_WARNING, "Unable to set keyboard backlight level %u: %d",
+						lcdlist->kb_backlight_state, brightness_result);
+#endif
+}
+
 /* send event to foreground client's eventlistener */
 int g15daemon_send_event(void *caller, unsigned int event, unsigned long value){
 	switch(event) {
@@ -232,6 +259,7 @@ static void *lcd_draw_thread(void *lcdlist){
 	memset(displaying->buf,0,1024);
 	static int prev_state=0;
 	g15daemon_sleep(2);
+	apply_startup_keyboard_state(masterlist);
 
 	while (!leaving) {
 		/* wait until a client has updated */
@@ -453,6 +481,7 @@ int main (int argc, char *argv[]) {
 		/* initialise the linked list */
 		lcdlist = ll_lcdlist_init();
 		lcdlist->nobody = nobody;
+		pthread_mutex_init(&g15lib_mutex, NULL);
 		uf_conf_open(lcdlist, "/etc/g15daemon.conf");
 		global_cfg=g15daemon_cfg_load_section(lcdlist,"Global");
 		lcdlist->kb_backlight_state=keyboard_backlight_level(global_cfg);
@@ -461,15 +490,9 @@ int main (int argc, char *argv[]) {
 		}
 
 		setLCDContrast(1);
-		setLEDs(G15_LED_M1);
 		lcdlist->current->lcd->backlight_state=lcdlevel;
 		setLCDBrightness(lcdlevel);
-
-#ifdef LIBG15_VERSION
-#if LIBG15_VERSION >= 1200
-	setKBBrightness(lcdlist->kb_backlight_state);
-#endif
-#endif
+		apply_startup_keyboard_state(lcdlist);
 
 #ifndef OSTYPE_SOLARIS
 		/* all other processes/threads should be seteuid nobody */
@@ -480,7 +503,6 @@ int main (int argc, char *argv[]) {
 #endif
 		/* initialise the pthread condition for the LCD thread */
 		g15daemon_init_refresh();
-		pthread_mutex_init(&g15lib_mutex, NULL);
 		pthread_attr_init(&attr);
 		pthread_attr_setstacksize(&attr,512*1024); /* set stack to 512k - dont need 8Mb !! */
 		if (pthread_create(&keyboard_thread, &attr, keyboard_watch_thread, lcdlist) != 0) {
@@ -505,6 +527,7 @@ int main (int argc, char *argv[]) {
 		uf_write_buf_to_g15(lcdlist->tail->lcd);
 		snprintf((char*)location,1024,"%s",PLUGINDIR);
 		loaded_plugins = g15_open_all_plugins(lcdlist,(char*)location);
+		apply_startup_keyboard_state(lcdlist);
 		new_action.sa_handler = g15daemon_sighandler;
 		new_action.sa_flags = 0;
 		sigaction(SIGINT, &new_action, NULL);

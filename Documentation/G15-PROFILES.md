@@ -19,6 +19,11 @@ Keyboard Backlight Level: 2
 Ungültige Werte werden protokolliert und durch Stufe 2 ersetzt. Die Taste für
 die Beleuchtung kann weiterhin zwischen den drei Stufen wechseln.
 
+Der Daemon wiederholt den gewählten Startwert nach der USB-Initialisierung,
+nach dem Laden der Plugins und nach der Initialisierungspause des LCD-Threads.
+Dies verhindert, dass eine spätere Hardware- oder Clientinitialisierung die
+Tastatur wieder auf die mittlere Stufe zurücksetzt.
+
 ## Profile M1, M2 und M3
 
 `g15daemon` meldet die Zusatztasten über sein UINPUT-Plugin als Linux-Tasten.
@@ -26,6 +31,10 @@ Die Vorlage [contrib/keyd/g15.conf](../contrib/keyd/g15.conf) übersetzt diese
 Ereignisse mit `keyd` in drei exklusive Profile mit je 18 frei belegbaren
 G-Tasten. Beim Start ist M1 aktiv; ein Druck auf M1, M2 oder M3 aktualisiert
 weiterhin die entsprechende LED der Tastatur.
+
+Neue LCD-Clients übernehmen M1 als neutralen Ausgangszustand. Dadurch löschen
+ein Applet- oder Bildschirmwechsel und das erste Client-Update die M1-LED
+nicht mehr.
 
 Die Zuordnungen sind zunächst `noop` und lösen damit absichtlich nichts aus.
 Erlaubt sind normale Tasten, Tastenkombinationen, `macro(...)` und mit der
