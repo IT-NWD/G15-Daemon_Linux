@@ -1,5 +1,7 @@
 LLIBDIR=@LIBDIR@
 
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS =  libg15daemon_client g15daemon plugins
 AM_CFLAGS =  -I$(top_srcdir)/libg15daemon_client -I$(top_srcdir)/g15daemon
 

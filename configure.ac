@@ -5,10 +5,11 @@
 AC_INIT([g15daemon],[3.0.1],[dmenelkir@gmail.com])
 AC_PREFIX_DEFAULT(/usr)
 AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIRS([m4])
 AC_CANONICAL_HOST()
 AC_CANONICAL_TARGET()
 
-AM_INIT_AUTOMAKE()
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 
 _LT_SET_OPTION([LT_INIT],[dlopen])
@@ -31,7 +32,6 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_PROG_GCC_TRADITIONAL
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([memset select socket strerror backtrace backtrace_symbols])
