@@ -135,6 +135,8 @@ CPPFLAGS="$CPPFLAGS "'-DPLUGINDIR=\"$(G15DAEMON_PLUGIN_DIR)\"'
 
 CPPFLAGS="$CPPFLAGS "'-I$(includedir)'
 
-AC_CONFIG_FILES([Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile])
+AC_CONFIG_FILES([Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile
+                 gui/g15-profile-editor])
+AC_CONFIG_COMMANDS([g15-profile-editor-mode], [chmod +x gui/g15-profile-editor])
 
 AC_OUTPUT

@@ -5,6 +5,10 @@ G15daemon  takes control of the G15 keyboard, allowing the use of all keys throu
 It  also controls  the use of the keyboard's LCD display, allows multiple, simultaneous client applications
 to connect, and gives  the  user the  ability to switch between client apps at the press of a button.
 
+The Logitech G15 v1 can start at maximum keyboard brightness and use M1, M2 and
+M3 as three configurable keyd profiles. See ``Documentation/G15-PROFILES.md``.
+Build, test and portability notes are in ``Documentation/DEVELOPMENT.md``.
+
 Currently, patches to enable support for the daemon are available for libgraphlcd, which in turn enables
 support for lcdproc, vdr, and any other applications able to use that library.
 

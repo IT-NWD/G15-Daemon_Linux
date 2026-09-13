@@ -15293,7 +15293,9 @@ CPPFLAGS="$CPPFLAGS "'-DPLUGINDIR=\"$(G15DAEMON_PLUGIN_DIR)\"'
 
 CPPFLAGS="$CPPFLAGS "'-I$(includedir)'
 
-ac_config_files="$ac_config_files Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile"
+ac_config_files="$ac_config_files Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile gui/g15-profile-editor"
+
+ac_config_commands="$ac_config_commands g15-profile-editor-mode"
 
 
 cat >confcache <<\_ACEOF
@@ -16287,6 +16289,8 @@ do
     "g15daemon/Makefile") CONFIG_FILES="$CONFIG_FILES g15daemon/Makefile" ;;
     "libg15daemon_client/Makefile") CONFIG_FILES="$CONFIG_FILES libg15daemon_client/Makefile" ;;
     "plugins/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/Makefile" ;;
+    "gui/g15-profile-editor") CONFIG_FILES="$CONFIG_FILES gui/g15-profile-editor" ;;
+    "g15-profile-editor-mode") CONFIG_COMMANDS="$CONFIG_COMMANDS g15-profile-editor-mode" ;;
 
   *) as_fn_error $? "invalid argument: '$ac_config_target'" "$LINENO" 5;;
   esac
@@ -17540,6 +17544,7 @@ ltmain=$ac_aux_dir/ltmain.sh
   chmod +x "$ofile"
 
  ;;
+    "g15-profile-editor-mode":C) chmod +x gui/g15-profile-editor ;;
 
   esac
 done # for ac_tag

@@ -40,6 +40,7 @@
 #include <libg15.h>
 #include <libg15render.h>
 #include "g15daemon.h"
+#include "settings.h"
 #ifndef LIBG15_VERSION
 	#define LIBG15_VERSION 1000
 #endif
@@ -53,6 +54,21 @@ unsigned int client_handles_keys = 0;
 static unsigned int set_backlight = 0;
 struct lcd_t *keyhandler = NULL;
 static int loaded_plugins = 0;
+
+static unsigned int keyboard_backlight_level(config_section_t *global_cfg) {
+	char *configured = g15daemon_cfg_read_string(global_cfg,
+											  "Keyboard Backlight Level", "2");
+	unsigned int level;
+
+	if (g15daemon_parse_backlight_level(configured, &level) != 0) {
+		g15daemon_log(LOG_WARNING,
+						"Invalid Keyboard Backlight Level '%s'; using 2",
+						configured);
+		return G15_BRIGHTNESS_BRIGHT;
+	}
+
+	return level;
+}
 
 /* send event to foreground client's eventlistener */
 int g15daemon_send_event(void *caller, unsigned int event, unsigned long value){
@@ -437,9 +453,15 @@ int main (int argc, char *argv[]) {
 		/* initialise the linked list */
 		lcdlist = ll_lcdlist_init();
 		lcdlist->nobody = nobody;
+		uf_conf_open(lcdlist, "/etc/g15daemon.conf");
+		global_cfg=g15daemon_cfg_load_section(lcdlist,"Global");
+		lcdlist->kb_backlight_state=keyboard_backlight_level(global_cfg);
+		if(!cycle_cmdline_override){
+			cycle_key = 1==g15daemon_cfg_read_bool(global_cfg,"Use MR as Cycle Key",0)?G15_KEY_MR:G15_KEY_L1;
+		}
+
 		setLCDContrast(1);
-		setLEDs(0);
-		lcdlist->kb_backlight_state=1;
+		setLEDs(G15_LED_M1);
 		lcdlist->current->lcd->backlight_state=lcdlevel;
 		setLCDBrightness(lcdlevel);
 
@@ -448,11 +470,6 @@ int main (int argc, char *argv[]) {
 	setKBBrightness(lcdlist->kb_backlight_state);
 #endif
 #endif
-		uf_conf_open(lcdlist, "/etc/g15daemon.conf");
-		global_cfg=g15daemon_cfg_load_section(lcdlist,"Global");
-		if(!cycle_cmdline_override){
-			cycle_key = 1==g15daemon_cfg_read_bool(global_cfg,"Use MR as Cycle Key",0)?G15_KEY_MR:G15_KEY_L1;
-		}
 
 #ifndef OSTYPE_SOLARIS
 		/* all other processes/threads should be seteuid nobody */

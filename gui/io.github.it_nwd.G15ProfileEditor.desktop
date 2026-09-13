@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=G15 Profile Editor
+Comment=Configure Logitech G15 v1 brightness and G-key profiles
+Exec=g15-profile-editor
+Icon=input-keyboard
+Terminal=false
+Categories=Settings;HardwareSettings;

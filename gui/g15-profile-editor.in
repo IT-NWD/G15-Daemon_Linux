@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""GTK 4 profile editor for the Logitech G15 v1."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import gi
+
+gi.require_version("Gtk", "4.0")
+from gi.repository import Gio, GLib, Gtk
+
+SOURCE_DIR = Path(__file__).resolve().parent
+DATAROOT_DIR = Path("@datarootdir@")
+INSTALLED_MODULE_DIR = Path("@datadir@/g15daemon/gui")
+sys.path.insert(0, str(SOURCE_DIR if (SOURCE_DIR / "g15_profile.py").exists()
+                       else INSTALLED_MODULE_DIR))
+
+import g15_keyd
+import g15_platform
+from g15_profile import PROFILE_NAMES, ProfileSet
+
+CONFIG_PATH = g15_platform.user_config_path()
+HELPER_PATH = Path("@libexecdir@/g15-profile-install")
+
+
+class ProfileWindow(Gtk.ApplicationWindow):
+    def __init__(self, application: Gtk.Application):
+        super().__init__(application=application, title="G15 Profile Editor")
+        self.set_default_size(720, 720)
+        load_error = None
+        try:
+            self.model = g15_keyd.load(CONFIG_PATH) if CONFIG_PATH.exists() else ProfileSet()
+        except (OSError, ValueError, KeyError) as error:
+            self.model = ProfileSet()
+            load_error = error
+        self.entries: dict[str, list[Gtk.Entry]] = {name: [] for name in PROFILE_NAMES}
+
+        root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        root.set_margin_top(16); root.set_margin_bottom(16)
+        root.set_margin_start(16); root.set_margin_end(16)
+        self.set_child(root)
+
+        settings = Gtk.Grid(column_spacing=12, row_spacing=8)
+        settings.attach(Gtk.Label(label="UINPUT-Geräte-ID", xalign=0), 0, 0, 1, 1)
+        self.device_id = Gtk.Entry(text=self.model.device_id, hexpand=True)
+        settings.attach(self.device_id, 1, 0, 1, 1)
+        settings.attach(Gtk.Label(label="Starthelligkeit", xalign=0), 0, 1, 1, 1)
+        self.brightness = Gtk.DropDown.new_from_strings(["0 – aus", "1 – mittel", "2 – maximal"])
+        self.brightness.set_selected(self.model.brightness)
+        settings.attach(self.brightness, 1, 1, 1, 1)
+        root.append(settings)
+
+        stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
+        switcher = Gtk.StackSwitcher(stack=stack, halign=Gtk.Align.CENTER)
+        root.append(switcher)
+        for profile in PROFILE_NAMES:
+            grid = Gtk.Grid(column_spacing=12, row_spacing=6)
+            grid.set_margin_top(8)
+            for index, action in enumerate(self.model.bindings[profile], start=1):
+                grid.attach(Gtk.Label(label=f"G{index}", xalign=1), 0, index - 1, 1, 1)
+                entry = Gtk.Entry(text=action, hexpand=True,
+                                  placeholder_text="noop, C-A-t oder macro(...)")
+                grid.attach(entry, 1, index - 1, 1, 1)
+                self.entries[profile].append(entry)
+            stack.add_titled(grid, profile, profile.upper())
+        scroller = Gtk.ScrolledWindow(vexpand=True, child=stack)
+        root.append(scroller)
+
+        root.append(Gtk.Label(
+            label="MR ist reserviert. LCD-Tasten und der runde Applet-Knopf bleiben unverändert.",
+            xalign=0, wrap=True))
+        buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8,
+                          halign=Gtk.Align.END)
+        for label, callback in (("Prüfen", self.on_validate),
+                                ("Speichern", self.on_save),
+                                ("Systemweit übernehmen …", self.on_apply)):
+            button = Gtk.Button(label=label)
+            button.connect("clicked", callback)
+            buttons.append(button)
+        root.append(buttons)
+        self.status = Gtk.Label(xalign=0, wrap=True)
+        if load_error is not None:
+            self.status.set_text(f"Vorhandenes Profil konnte nicht geladen werden: {load_error}")
+        root.append(self.status)
+
+    def collect(self) -> ProfileSet:
+        return ProfileSet(
+            device_id=self.device_id.get_text().strip(),
+            brightness=int(self.brightness.get_selected()),
+            bindings={name: [entry.get_text().strip() for entry in self.entries[name]]
+                      for name in PROFILE_NAMES},
+        )
+
+    def validate_with_keyd(self, model: ProfileSet) -> None:
+        g15_keyd.validate(model, g15_platform.find_tool("G15_KEYD", "keyd"))
+
+    def execute(self, save: bool) -> ProfileSet | None:
+        try:
+            model = self.collect()
+            self.validate_with_keyd(model)
+            if save:
+                g15_keyd.save(model, CONFIG_PATH)
+                self.model = model
+            self.status.set_text("Konfiguration ist gültig." if not save else
+                                 f"Gespeichert und geprüft: {CONFIG_PATH}")
+            return model
+        except (OSError, ValueError) as error:
+            self.status.set_text(f"Fehler: {error}")
+            return None
+
+    def on_validate(self, _button: Gtk.Button) -> None:
+        self.execute(save=False)
+
+    def on_save(self, _button: Gtk.Button) -> None:
+        self.execute(save=True)
+
+    def on_apply(self, _button: Gtk.Button) -> None:
+        model = self.execute(save=True)
+        if model is None:
+            return
+        helper = HELPER_PATH if HELPER_PATH.exists() else SOURCE_DIR / "g15-profile-install"
+        try:
+            command = g15_platform.system_apply_command(
+                helper, CONFIG_PATH, model.brightness)
+            process = Gio.Subprocess.new(
+                command,
+                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
+            process.communicate_utf8_async(None, None, self.on_apply_finished)
+            self.status.set_text("Systemweite Übernahme läuft …")
+        except (GLib.Error, OSError) as error:
+            message = error.message if isinstance(error, GLib.Error) else str(error)
+            self.status.set_text(f"Übernahme konnte nicht gestartet werden: {message}")
+
+    def on_apply_finished(self, process: Gio.Subprocess, result) -> None:
+        try:
+            _successful, output, _error_output = process.communicate_utf8_finish(result)
+            if process.get_successful():
+                self.status.set_text(output.strip())
+            else:
+                self.status.set_text(f"Übernahme fehlgeschlagen: {output.strip()}")
+        except GLib.Error as error:
+            self.status.set_text(f"Übernahme fehlgeschlagen: {error.message}")
+
+
+class ProfileApplication(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="io.github.it_nwd.G15ProfileEditor")
+
+    def do_activate(self):
+        window = self.props.active_window or ProfileWindow(self)
+        window.present()
+
+
+raise SystemExit(ProfileApplication().run(sys.argv))

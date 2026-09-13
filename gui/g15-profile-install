@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Privileged installer used by G15 Profile Editor via pkexec."""
+
+from __future__ import annotations
+
+import datetime
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+DEVICE_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}:[0-9a-fA-F]{8}$")
+KEYD_TARGET = Path("/etc/keyd/g15.conf")
+DAEMON_CONFIG = Path("/etc/g15daemon.conf")
+BACKUP_DIR = Path("/var/backups/g15daemon-config")
+
+
+def fail(message: str) -> None:
+    raise SystemExit(f"Fehler: {message}")
+
+
+def read_user_file(path: Path) -> bytes:
+    expected_uid = int(os.environ.get("PKEXEC_UID", "-1"))
+    info = path.lstat()
+    if not stat.S_ISREG(info.st_mode) or info.st_uid != expected_uid:
+        fail("Die Profildatei muss dem aufrufenden Benutzer gehören und regulär sein.")
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        opened = os.fstat(descriptor)
+        if opened.st_ino != info.st_ino or opened.st_dev != info.st_dev:
+            fail("Die Profildatei wurde während des Öffnens ausgetauscht.")
+        chunks = []
+        remaining = 1024 * 1024 + 1
+        while remaining:
+            chunk = os.read(descriptor, min(65536, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(descriptor)
+
+
+def find_device_id(profile: str) -> str:
+    in_ids = False
+    for raw_line in profile.splitlines():
+        line = raw_line.strip()
+        if line == "[ids]":
+            in_ids = True
+            continue
+        if in_ids and line.startswith("["):
+            break
+        if in_ids and line and not line.startswith("#"):
+            if not DEVICE_ID_PATTERN.fullmatch(line):
+                fail("Ungültige Geräte-ID in der Profildatei.")
+            return line.lower()
+    fail("In der Profildatei fehlt die Geräte-ID.")
+
+
+def ensure_unique_device(device_id: str) -> None:
+    for config in Path("/etc/keyd").glob("*.conf"):
+        if config == KEYD_TARGET:
+            continue
+        try:
+            if device_id in config.read_text(encoding="utf-8").lower():
+                fail(f"Die Geräte-ID ist bereits in {config} eingetragen.")
+        except OSError:
+            continue
+
+
+def update_brightness(text: str, brightness: int) -> str:
+    lines = text.splitlines()
+    global_start = next((i for i, line in enumerate(lines)
+                         if line.strip().lower() == "[global]"), None)
+    setting = f"Keyboard Backlight Level: {brightness}"
+    if global_start is None:
+        return text.rstrip() + f"\n\n[Global]\n{setting}\n"
+    end = next((i for i in range(global_start + 1, len(lines))
+                if lines[i].strip().startswith("[")), len(lines))
+    for index in range(global_start + 1, end):
+        if lines[index].split(":", 1)[0].strip().lower() == "keyboard backlight level":
+            lines[index] = setting
+            break
+    else:
+        lines.insert(end, setting)
+    return "\n".join(lines) + "\n"
+
+
+def backup(path: Path, stamp: str) -> None:
+    if path.exists():
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, BACKUP_DIR / f"{path.name}.{stamp}")
+
+
+def main() -> None:
+    if os.geteuid() != 0 or len(sys.argv) != 3:
+        fail("Dieser Helfer muss über die GUI mit Administratorrechten gestartet werden.")
+    try:
+        brightness = int(sys.argv[2])
+    except ValueError:
+        fail("Ungültige Helligkeit.")
+    if brightness not in (0, 1, 2):
+        fail("Die Helligkeit muss 0, 1 oder 2 sein.")
+
+    profile_bytes = read_user_file(Path(sys.argv[1]))
+    if len(profile_bytes) > 1024 * 1024:
+        fail("Die Profildatei ist unerwartet groß.")
+    try:
+        profile = profile_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        fail("Die Profildatei ist nicht als UTF-8 codiert.")
+    device_id = find_device_id(profile)
+    ensure_unique_device(device_id)
+    keyd_command = shutil.which("keyd")
+    if keyd_command is None:
+        fail("keyd wurde nicht gefunden.")
+
+    with tempfile.NamedTemporaryFile(prefix="g15-keyd-", delete=False) as temporary:
+        temporary.write(profile_bytes)
+        temporary_path = Path(temporary.name)
+    try:
+        check = subprocess.run([keyd_command, "check", str(temporary_path)], text=True,
+                               capture_output=True, check=False)
+        if check.returncode:
+            fail((check.stdout + check.stderr).strip())
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup(KEYD_TARGET, stamp)
+    backup(DAEMON_CONFIG, stamp)
+    KEYD_TARGET.parent.mkdir(parents=True, exist_ok=True)
+    KEYD_TARGET.write_bytes(profile_bytes)
+    KEYD_TARGET.chmod(0o644)
+    daemon_text = DAEMON_CONFIG.read_text(encoding="utf-8") if DAEMON_CONFIG.exists() else ""
+    DAEMON_CONFIG.write_text(update_brightness(daemon_text, brightness), encoding="utf-8")
+    DAEMON_CONFIG.chmod(0o644)
+    subprocess.run([keyd_command, "reload"], check=True)
+    print("Profile wurden übernommen. Die Helligkeit wird beim nächsten Daemon-Start aktiv.")
+
+
+if __name__ == "__main__":
+    main()
