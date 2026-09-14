@@ -50,6 +50,21 @@ Hardwaretests sind bewusst nicht Teil der automatischen Tests: Sie benötigen
 exklusiven USB-Zugriff und würden einen laufenden g15daemon samt LCD-Clients
 unterbrechen.
 
+Bei Pushes auf `main` und in Pull Requests baut GitHub Actions das Projekt auf
+Ubuntu 24.04 sowohl mit GCC als auch mit Clang. Beide Jobs führen `make check`
+und `make distcheck` aus. Die CI ist eine zusätzliche Prüfung; Paket- und
+Hardwaretests auf den Zielsystemen bleiben weiterhin erforderlich.
+
+## Aktionen und Sicherheitsgrenzen
+
+Das Datenmodell kennt deaktivierte Tasten, Tastenkombinationen, einfache und
+wiederholte Makros sowie einen Expertenmodus. Die Serialisierung in keyd bleibt
+im Backend. Programmstarts werden nicht als `command(...)` in die
+Systemkonfiguration geschrieben, weil diese Befehle im Kontext des meist als
+root laufenden keyd ausgeführt würden. Ein späteres Programmstart-Backend muss
+als angemeldeter Benutzer laufen und eine klar begrenzte IPC-Schnittstelle
+verwenden.
+
 ## Konfigurierbare Pfade
 
 Die GUI unterstützt folgende Laufzeit-Overrides für Paketierung und Tests:

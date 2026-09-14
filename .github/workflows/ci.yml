@@ -1,0 +1,49 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Ubuntu 24.04 · ${{ matrix.compiler }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: GCC
+            cc: gcc
+          - compiler: Clang
+            cc: clang
+    env:
+      CC: ${{ matrix.cc }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf automake build-essential libg15-dev libg15render-dev libtool python3
+
+      - name: Generate build system
+        run: autoreconf --force --install
+
+      - name: Configure
+        run: ./configure --prefix=/usr --sbindir=/usr/bin
+
+      - name: Build
+        run: make --jobs=2
+
+      - name: Run test suite
+        run: make check
+
+      - name: Verify distribution archive
+        run: make distcheck
