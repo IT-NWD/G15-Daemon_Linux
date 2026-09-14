@@ -1,4 +1,4 @@
-name: Build and test
+name: Bauen und testen
 
 on:
   push:
@@ -24,26 +24,26 @@ jobs:
     env:
       CC: ${{ matrix.cc }}
     steps:
-      - name: Check out source
+      - name: Quellcode auschecken
         uses: actions/checkout@v7
 
-      - name: Install build dependencies
+      - name: Bauabhängigkeiten installieren
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
             autoconf automake build-essential libg15-dev libg15render-dev libtool python3
 
-      - name: Generate build system
+      - name: Bausystem erzeugen
         run: autoreconf --force --install
 
-      - name: Configure
+      - name: Konfigurieren
         run: ./configure --prefix=/usr --sbindir=/usr/bin
 
-      - name: Build
+      - name: Bauen
         run: make --jobs=2
 
-      - name: Run test suite
+      - name: Tests ausführen
         run: make check
 
-      - name: Verify distribution archive
+      - name: Distributionsarchiv prüfen
         run: make distcheck

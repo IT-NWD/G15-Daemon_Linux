@@ -1,0 +1,30 @@
+name: Funktionswunsch
+description: Eine neue Funktion oder Verbesserung vorschlagen
+title: "[Wunsch]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Anwendungsfall
+      description: Welches konkrete Problem soll gelöst werden?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Gewünschte Lösung
+      description: Wie sollte sich die Funktion aus Sicht des Benutzers verhalten?
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Zielplattform
+      description: Distribution oder Betriebssystem und Desktop
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Welche anderen Lösungen wurden bereits ausprobiert?
