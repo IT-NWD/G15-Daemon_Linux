@@ -640,6 +640,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+G15_PROFILE_HELPER
+G15_GUI_MODULE_DIR
 G15DAEMON_PLUGIN_DIR
 UINPUT_INTERFACE_PLUGIN_FALSE
 UINPUT_INTERFACE_PLUGIN_TRUE
@@ -15292,6 +15294,25 @@ G15DAEMON_PLUGIN_DIR="$libdir/g15daemon/$PACKAGE_VERSION/plugins"
 CPPFLAGS="$CPPFLAGS "'-DPLUGINDIR=\"$(G15DAEMON_PLUGIN_DIR)\"'
 
 CPPFLAGS="$CPPFLAGS "'-I$(includedir)'
+
+g15_saved_prefix=$prefix
+g15_saved_exec_prefix=$exec_prefix
+if test "x$prefix" = xNONE
+then :
+  prefix=$ac_default_prefix
+fi
+if test "x$exec_prefix" = xNONE
+then :
+  exec_prefix=$prefix
+fi
+eval G15_GUI_MODULE_DIR=\"$datadir/g15daemon/gui\"
+eval G15_GUI_MODULE_DIR=\"$G15_GUI_MODULE_DIR\"
+eval G15_PROFILE_HELPER=\"$libexecdir/g15-profile-install\"
+eval G15_PROFILE_HELPER=\"$G15_PROFILE_HELPER\"
+prefix=$g15_saved_prefix
+exec_prefix=$g15_saved_exec_prefix
+
+
 
 ac_config_files="$ac_config_files Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile gui/g15-profile-editor"
 

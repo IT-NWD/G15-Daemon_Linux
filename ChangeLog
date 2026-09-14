@@ -4,6 +4,7 @@ Unreleased
 * Add named profile import/export, M-bank copying and reset presets.
 * Add GCC and Clang GitHub Actions builds with the full test suite.
 * Document why program launches require a separate unprivileged backend.
+* Fix installed GUI module and helper paths containing unexpanded prefixes.
 
 1.0-pre0
 * Release: Initial release

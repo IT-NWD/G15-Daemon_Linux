@@ -13,7 +13,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk
 
 SOURCE_DIR = Path(__file__).resolve().parent
-INSTALLED_MODULE_DIR = Path("@datadir@/g15daemon/gui")
+INSTALLED_MODULE_DIR = Path("@G15_GUI_MODULE_DIR@")
 sys.path.insert(0, str(SOURCE_DIR if (SOURCE_DIR / "g15_profile.py").exists()
                        else INSTALLED_MODULE_DIR))
 
@@ -22,7 +22,7 @@ import g15_platform
 from g15_profile import ActionKind, BindingAction, PROFILE_NAMES, ProfileSet
 
 CONFIG_PATH = g15_platform.user_config_path()
-HELPER_PATH = Path("@libexecdir@/g15-profile-install")
+HELPER_PATH = Path("@G15_PROFILE_HELPER@")
 ACTION_KINDS = (
     (ActionKind.DISABLED, "Deaktiviert"),
     (ActionKind.KEYSTROKE, "Einzeltaste oder Tastenkombination"),

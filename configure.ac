@@ -135,6 +135,21 @@ CPPFLAGS="$CPPFLAGS "'-DPLUGINDIR=\"$(G15DAEMON_PLUGIN_DIR)\"'
 
 CPPFLAGS="$CPPFLAGS "'-I$(includedir)'
 
+dnl AC_CONFIG_FILES does not recursively expand ${prefix} in directory variables.
+dnl Resolve the Python module and helper paths to literals for the generated GUI.
+g15_saved_prefix=$prefix
+g15_saved_exec_prefix=$exec_prefix
+AS_IF([test "x$prefix" = xNONE], [prefix=$ac_default_prefix])
+AS_IF([test "x$exec_prefix" = xNONE], [exec_prefix=$prefix])
+eval G15_GUI_MODULE_DIR=\"$datadir/g15daemon/gui\"
+eval G15_GUI_MODULE_DIR=\"$G15_GUI_MODULE_DIR\"
+eval G15_PROFILE_HELPER=\"$libexecdir/g15-profile-install\"
+eval G15_PROFILE_HELPER=\"$G15_PROFILE_HELPER\"
+prefix=$g15_saved_prefix
+exec_prefix=$g15_saved_exec_prefix
+AC_SUBST([G15_GUI_MODULE_DIR])
+AC_SUBST([G15_PROFILE_HELPER])
+
 AC_CONFIG_FILES([Makefile g15daemon/Makefile libg15daemon_client/Makefile plugins/Makefile
                  gui/g15-profile-editor])
 AC_CONFIG_COMMANDS([g15-profile-editor-mode], [chmod +x gui/g15-profile-editor])

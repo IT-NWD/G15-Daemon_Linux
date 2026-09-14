@@ -6,6 +6,7 @@ daemon_config="$source_dir/contrib/init/g15daemon.conf"
 keyd_config="$source_dir/contrib/keyd/g15.conf"
 daemon_main="$source_dir/g15daemon/main.c"
 linked_lists="$source_dir/g15daemon/linked_lists.c"
+profile_editor="gui/g15-profile-editor"
 
 grep -q '^Keyboard Backlight Level: 2$' "$daemon_config"
 grep -q '^default_layout = m1$' "$keyd_config"
@@ -19,6 +20,14 @@ test "$noop_count" -eq 54
 
 test "$(grep -Ec 'apply_startup_keyboard_state\((lcdlist|masterlist)\);' "$daemon_main")" -eq 3
 test "$(grep -c 'mkey_state = G15_LED_M1;' "$linked_lists")" -eq 2
+
+test -x "$profile_editor"
+grep -Eq '^INSTALLED_MODULE_DIR = Path\("/[^$]*"\)$' "$profile_editor"
+grep -Eq '^HELPER_PATH = Path\("/[^$]*"\)$' "$profile_editor"
+if grep -q '\${\(prefix\|exec_prefix\)}' "$profile_editor"; then
+    echo "Nicht aufgelöster Installationspfad im Profileditor." >&2
+    exit 1
+fi
 
 if command -v keyd >/dev/null 2>&1; then
     keyd check "$keyd_config"
