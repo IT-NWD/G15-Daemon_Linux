@@ -7,7 +7,8 @@ AM_CFLAGS =  -I$(top_srcdir)/libg15daemon_client -I$(top_srcdir)/g15daemon
 
 EXTRA_DIST = contrib Documentation gui/g15-profile-editor.in \
 	tests/test-configs.sh tests/test-profile-model.py tests/test-install-helper.py \
-	README.usage FAQ LICENSE images README.Linux README.FreeBSD README.Solaris
+	README.md CONTRIBUTING.md SECURITY.md README.usage FAQ LICENSE images \
+	README.Linux README.FreeBSD README.Solaris
 
 check_PROGRAMS = tests/test-settings
 tests_test_settings_SOURCES = tests/test-settings.c g15daemon/settings.c
@@ -25,7 +26,7 @@ dist_desktop_DATA = gui/io.github.it_nwd.G15ProfileEditor.desktop
 CLEANFILES = gui/g15-profile-editor
 
 docdir = @docdir@
-doc_DATA = FAQ README.usage README ChangeLog TODO AUTHORS NEWS LICENSE README.Linux README.FreeBSD README.Solaris \
+doc_DATA = README.md CONTRIBUTING.md SECURITY.md FAQ README.usage README ChangeLog TODO AUTHORS NEWS LICENSE README.Linux README.FreeBSD README.Solaris \
 	Documentation/G15-PROFILES.md Documentation/DEVELOPMENT.md
 
 examplesdir = $(docdir)/examples

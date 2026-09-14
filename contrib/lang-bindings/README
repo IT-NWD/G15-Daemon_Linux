@@ -1,16 +1,21 @@
-***** Perl bindings *****
-To use the perl language bindings for libg15daemon_client, copy the
-G15Daemon.pm file into a perl include folder, or untar the archive and run
-the makefile with:
+Historische Sprachanbindungen
+=============================
 
-perl Makefile.PL && make && make install
+Dieses Verzeichnis enthält ältere Perl- und Python-Anbindungen für die
+G15Daemon-Clientbibliothek. Sie werden derzeit nicht in der automatischen
+Testmatrix geprüft und sollten vor produktiver Verwendung auf Kompatibilität
+mit der jeweiligen aktuellen Laufzeit untersucht werden.
 
-You'll need to have the
-Inline:: perl module installed, which is (as usual) available on CPAN.
+Perl
+----
 
-The bindings are pretty basic, see the contribs folder for an example of
-use.
+`G15Daemon.pm` kann in einen Perl-Modulpfad kopiert werden. Das beigefügte
+Archiv verwendet den klassischen Ablauf `perl Makefile.PL`, `make` und
+`make install` und benötigt das Perl-Modul Inline.
 
-***** Python Bindings *****
-The pyg15daemon bindings are available in this folder, or the latest release
-of these bindings are available at http://abraumhal.de/pyg15daemon/
+Python
+------
+
+Das beigefügte pyg15daemon-Archiv stammt aus der historischen
+Projektentwicklung. Für neue Anwendungen wird empfohlen, die aktuelle
+C-Clientbibliothek direkt oder über neu gepflegte Bindings anzusprechen.

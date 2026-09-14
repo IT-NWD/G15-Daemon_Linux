@@ -1,78 +1,65 @@
-This  file  contains  some frequently asked questions and answers
-regarding G15Daemon and it's installation.
+Häufig gestellte Fragen
+=======================
 
-Q1.     G15daemon complains that it can't find libg15.so.1 !!
-Q1a.	G15daemon complains that it can't find libg15render.so.1 !!
-Answer:
+Warum startet g15daemon nicht?
+------------------------------
 
-Some of the g15 libraries are installed in /usr/local/lib.
-Some distros don't look  there  for libraries by  default.  There 
-are two ways around this - 
+Prüfe zuerst, ob bereits eine Instanz läuft und ob das USB-Gerät verfügbar
+ist. Für eine aussagekräftige Meldung den Dienst beenden und den Daemon mit
+"sudo g15daemon --debug" im Vordergrund starten.
 
-1. add /usr/local/lib to /etc/ld.so.conf (you'll need to be root)
-   and run ldconfig or 
+Warum werden libg15 oder libg15render nicht gefunden?
+-----------------------------------------------------
 
-2.rerun the library configure script with --prefix=/usr,then make 
-   && make install. This  will install  libg15  into the /usr/lib 
-   directory.
+Installiere die Laufzeit- und Entwicklungspakete der Distribution. Bei einer
+Installation unter /usr/local muss dieser Bibliothekspfad dem dynamischen
+Linker bekannt sein. Für Distributionspakete wird der Präfix /usr empfohlen.
 
+Warum ist die Tastatur nach dem Start nur mittelhell?
+----------------------------------------------------
 
-Q2.     G15daemon  complains  about  not receiving a return value
-and won't run!!
+In der geladenen g15daemon.conf muss im Abschnitt [Global] der Eintrag
+"Keyboard Backlight Level: 2" stehen. Danach den Daemon kontrolliert neu
+starten. Der Wert 2 entspricht der maximalen Helligkeit.
 
-Answer:
+Warum leuchtet M1 beim Start?
+-----------------------------
 
-G15daemon really needs to be run by the user root.   If  you  are
-already running as root, and you still see this error, please let
-us know.
+M1 ist der neutrale Ausgangszustand der drei G-Tasten-Ebenen. M1, M2 und M3
+schalten zwischen den drei Gruppen mit jeweils 18 Belegungen um.
 
+Gehört der runde Knopf unter dem LCD zu M1-M3?
+----------------------------------------------
 
-Q3.     My 'G' keys dont work in X11 !!
+Nein. Er ist die L1-/Applet-Umschalttaste für LCD-Clients. Auch die übrigen
+LCD-Tasten sind von den 54 G-Tasten-Belegungen getrennt.
 
-Answer:
+Warum führen die G-Tasten zunächst nichts aus?
+-----------------------------------------------
 
-The daemon adds new scancodes for all the G & M keys.  X11 doesnt
-understand  some  of these.  In order to have the keys work in X,
-you'll find an xmodmaprc script and a bash script in the  contrib
-directory.  Copy the xmodmaprc file to $HOME/.Xmodmap and set the
-bash script to run every time X11 starts.  KDE has  an  AutoStart
-folder you can put it in, Gnome probably has something similar.
+Die Vorlage verwendet absichtlich deaktivierte Zuordnungen. Öffne
+"G15 Profile Editor", wähle M1, M2 oder M3 und bearbeite die gewünschte
+G-Taste. Anschließend das Profil speichern und systemweit übernehmen.
 
+Warum wird command(...) nicht angeboten?
+-----------------------------------------
 
-Q4.	What devices are currently supported with G15Daemon?
+keyd läuft üblicherweise mit Systemrechten. Ein dort hinterlegter
+Programmstart würde deshalb ebenfalls privilegiert ausgeführt. Das Projekt
+blockiert diesen unsicheren Weg und sieht für spätere Programmstarts einen
+unprivilegierten Benutzerdienst vor.
 
-Answer:
+Ist das Projekt nur für CachyOS geeignet?
+-----------------------------------------
 
-G15Daemon is designed to support whatever devices libg15 supports.
-Currently,this means the G15 Keyboard(s), the G11 Keyboard and Z10
-Speakers.
+Nein. Der Daemon verwendet Autotools; die Oberfläche erkennt benötigte
+Werkzeuge zur Laufzeit. Lediglich die Paketnamen und die Dienstinstallation
+unterscheiden sich zwischen Distributionen. Das aktuelle Profilbackend setzt
+Linux, keyd und Polkit voraus.
 
+Wie melde ich einen Fehler?
+---------------------------
 
-Q5.	Why doesn't G15Daemon use DBUS or DCOP?
-
-Answer:
-
-DBUS is a nice but we want to keep dependancies to the minimum, 
-and using DBUS would mean we have to ensure that G15Daemon is loaded  
-after the DBUS server, which is something we can't guarantee. Down  
-the track we will look at providing a DBUS G15Daemon proxy.
-
-
-Q6.	Is G15Daemon able to run on my operating system?
-
-Answer:
-
-G15Daemon  currently has  support  for Linux, MacOSX and Solaris.
-Some Linux  distributions  include the  G15Tools in their package
-managers, however those may not be up-to-date.
-
-FreeBSD is supported and it's a WIP. It's still a bit flacky. LCD
-works as expected, I still have some issues with the G-Keys and
-multimedia keys.
-
-Q7.	Will G15Daemon ever run on Windows?
-
-Answer:
-
-It might, but not by design.  There is commercial support from
-Logitech for that operating system.
+Nutze die GitHub-Fehlervorlage und füge Distribution, Desktop, Modell,
+Build-Ausgabe sowie relevante Dienstprotokolle bei. Keine Passwörter,
+Gerätekennungen anderer Geräte oder sonstige vertrauliche Daten veröffentlichen.

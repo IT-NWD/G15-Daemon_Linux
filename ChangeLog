@@ -1,10 +1,11 @@
 Unreleased
-* Add a Windows-inspired GTK 4 profile editor for the physical G15 v1 layout.
-* Add typed keystroke, macro, repeating-macro and advanced keyd actions.
-* Add named profile import/export, M-bank copying and reset presets.
-* Add GCC and Clang GitHub Actions builds with the full test suite.
-* Document why program launches require a separate unprivileged backend.
-* Fix installed GUI module and helper paths containing unexpanded prefixes.
+* GTK-4-Profileditor nach dem Vorbild der Windows-Anwendung für die G15 v1 ergänzt.
+* Tastenfolgen, Makros, wiederholte Makros und erweiterte keyd-Aktionen ergänzt.
+* Profilimport und -export, Kopieren von M-Ebenen und Standardbelegungen ergänzt.
+* GitHub-Actions-Builds mit GCC, Clang und vollständiger Testsuite ergänzt.
+* Sicherheitsgrenze für Programmstarts über ein unprivilegiertes Backend dokumentiert.
+* Installierte Modul- und Helferpfade der Oberfläche korrekt aufgelöst.
+* Aktuelle Projekt- und GitHub-Dokumentation vollständig auf Deutsch umgestellt.
 
 1.0-pre0
 * Release: Initial release

@@ -1,22 +1,23 @@
-********************************************************************************
-TODO list for G15daemon.  Not in any particular order.
-********************************************************************************
+Roadmap
+-------
 
-- add a few simple template client examples in various languages
+Geplante Funktionen
+-------------------
 
-- write a small client app to set configuration options on-the-fly (M-key
-toggle, backlight, etc)
+- MR-Schnellaufnahme mit einem unprivilegierten, persistenten Makrorecorder
+- anwendungsabhängige Profile und automatische Profilwechsel
+- sicherer Benutzerdienst für Programmstarts
+- austauschbare Eingabe-Backends neben keyd
+- Anzeige und Verwaltung erkannter G15-Geräte in der Oberfläche
+- distributionsübergreifende Pakete und weiterführende Installationsprüfungen
 
-- Allow for clients to send text-based commands controlling the output (need
-interpreter for this)
+Technische Aufgaben
+-------------------
 
-- Allow for clients to set a time-to-live for screens they create, which
-will allow the client app to exit without taking the screen with them.
+- weitere automatisierte Tests für Import, Migration und Fehlerfälle
+- aktuelle Übersetzungen der Handbuchseiten und Oberflächentexte pflegen
+- historische Plattformunterstützung auf realer Hardware neu bewerten
+- kleine Beispielclients für die LCD-Clientbibliothek ergänzen
 
-- Clients using the above functionality ought to be able to re-connect and
-use the 'screen' they previously created, as long as they return within the
-'time-to-live' period they set before exiting. This will allow for scripts
-etc to periodically update.
-
-- Add DBUS proxy.
-
+Die Reihenfolge ist nicht verbindlich. Neue Vorschläge sollten als
+GitHub-Issue mit Anwendungsfall und Zielplattform beschrieben werden.

@@ -1,7 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=G15 Profile Editor
-Comment=Configure Logitech G15 v1 profiles, macros and G-keys
+GenericName=G-Tasten-Profileditor
+Comment=Profile, Makros und G-Tasten der Logitech G15 v1 konfigurieren
 Exec=g15-profile-editor
 Icon=input-keyboard
 Terminal=false

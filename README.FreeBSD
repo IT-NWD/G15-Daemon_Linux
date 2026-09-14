@@ -1,4 +1,10 @@
-You need to set evdev to deal with events instead of kbdmux
-so add this to your /boot/loader.conf.local:
+Hinweise für FreeBSD
+====================
 
-kern.evdev.rcpt_mask="12"
+Der historische Upstream enthielt experimentelle FreeBSD-Unterstützung. Sie
+wird in diesem Repository derzeit nicht regelmäßig gebaut oder auf echter
+Hardware getestet. Das Linux-spezifische UINPUT-/keyd-Profilbackend ist unter
+FreeBSD nicht verfügbar.
+
+Portierungsbeiträge sind willkommen, sollten aber Daemon, Profilmodell und
+plattformabhängiges Eingabe-Backend sauber getrennt halten.

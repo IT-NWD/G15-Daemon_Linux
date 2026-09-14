@@ -9,7 +9,7 @@ AC_CONFIG_MACRO_DIRS([m4])
 AC_CANONICAL_HOST()
 AC_CANONICAL_TARGET()
 
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 
 _LT_SET_OPTION([LT_INIT],[dlopen])

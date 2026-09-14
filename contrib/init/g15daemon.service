@@ -1,5 +1,5 @@
 [Unit]
-Description=Logitech G15 Support Daemon
+Description=Daemon für die Logitech G15
 Documentation=man:g15daemon(1)
 #After=sys-subsystem-usb-g15.device
 #StopWhenUnneeded=true
@@ -7,7 +7,7 @@ Documentation=man:g15daemon(1)
 [Service]
 Type=forking
 PIDFile=/run/g15daemon.pid
-ExecStart=/usr/sbin/g15daemon
+ExecStart=/usr/bin/g15daemon
 
 [Install]
 #WantedBy=sys-subsystem-usb-g15.device
