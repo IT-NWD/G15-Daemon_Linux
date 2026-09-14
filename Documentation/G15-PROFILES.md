@@ -37,8 +37,10 @@ ein Applet- oder Bildschirmwechsel und das erste Client-Update die M1-LED
 nicht mehr.
 
 Die Zuordnungen sind zunächst `noop` und lösen damit absichtlich nichts aus.
-Erlaubt sind normale Tasten, Tastenkombinationen, `macro(...)` und mit der
-nötigen Vorsicht `command(...)`.
+Erlaubt sind normale Tasten, Tastenkombinationen und keyd-Makros. Die direkte
+keyd-Aktion `command(...)` wird in der normalen Oberfläche bewusst nicht
+angeboten: keyd läuft üblicherweise als root und würde den Befehl daher mit
+Systemrechten starten.
 
 ## Installation der Profilvorlage
 
@@ -57,8 +59,26 @@ G15-Zuordnung muss daher vorher gesichert oder entfernt werden.
 ## Grafischer Profileditor
 
 `g15-profile-editor` bietet eine GTK-4-Oberfläche für die Starthelligkeit und
-alle 54 Belegungen der drei M-Profile. Ohne Installation kann die erzeugte
-Datei aus dem Build-Verzeichnis mit `gui/g15-profile-editor` gestartet werden.
+alle 54 Belegungen der drei M-Profile. Die Anordnung aus drei Spalten mit je
+sechs G-Tasten entspricht dem Tastenblock der G15 v1. Ohne Installation kann
+die erzeugte Datei aus dem Build-Verzeichnis mit `gui/g15-profile-editor`
+gestartet werden.
+
+Wie im Logitech G-Series Key Profiler wird zuerst M1, M2 oder M3 gewählt und
+danach eine G-Taste bearbeitet. Der Aktionseditor unterstützt:
+
+- deaktivierte Tasten;
+- Einzeltasten und Tastenkombinationen wie `f5`, `C-c` oder `C-A-t`;
+- Tastenfolgen mit optionalen Pausen, zum Beispiel
+  `C-t 100ms example.com enter`;
+- wiederholte Makros mit einstellbarer Start- und Wiederholverzögerung;
+- unveränderte keyd-Ausdrücke für erfahrene Benutzer.
+
+Ein kompletter M-Modus kann in einen anderen kopiert, deaktiviert oder auf die
+historische Windows-Standardbelegung zurückgesetzt werden. Diese belegt G1–G12
+mit F1–F12 und G13–G18 mit 1–6. Profile haben einen Namen und können als
+lesbare `.conf`-Datei importiert oder exportiert werden. Import und Export
+akzeptieren absichtlich nur lokale Dateien.
 
 Die Schaltfläche **Speichern** schreibt zunächst ausschließlich nach
 `~/.config/g15daemon/g15.conf` und prüft die Datei mit `keyd check`.
@@ -100,3 +120,16 @@ Linux-Namen ab. Die LCD-Tasten werden nicht durch keyd übernommen.
 MR ist in der ersten Ausbaustufe deaktiviert. Eine Windows-ähnliche
 Laufzeitaufzeichnung benötigt einen eigenen, persistenten Makrorecorder und
 wird getrennt entwickelt.
+
+## Bezug zur Logitech-Windows-Software
+
+Der Bedienablauf orientiert sich an Logitechs dokumentiertem G15-Profiler:
+54 Belegungen über M1–M3, Einzeltasten, Makros, Wiederholung, Zurücksetzen und
+Schnellaufnahme über MR. Anwendungsabhängige Profile und MR-Schnellaufnahme
+benötigen unter Linux einen Benutzerdienst und werden deshalb nicht unsicher in
+das privilegierte keyd-Backend eingebaut.
+
+- [Logitech: G15 G-keys anpassen](https://support.logi.com/hc/de/articles/360023216194-Anpassen-der-G15-G-Tasten)
+- [Logitech: Makros im G-Series Keyboard Profiler aufzeichnen](https://support.logi.com/hc/en-nz/articles/360023372613-Legacy-Software-Tutorial-Recording-a-macro-in-the-G-Series-Keyboard-Profiler)
+- [Logitech: Schnellmakro mit MR aufzeichnen](https://support.logi.com/hc/en-gb/articles/360023371733-Legacy-Software-Tutorial-Recording-a-quick-on-the-fly-Macro-in-Logitech-G-series-Keyboard-Software)
+- [keyd: Konfiguration, Makros und Aktionen](https://github.com/rvaiya/keyd/blob/master/docs/keyd.scdoc)

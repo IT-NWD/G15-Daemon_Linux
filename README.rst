@@ -6,7 +6,9 @@ It  also controls  the use of the keyboard's LCD display, allows multiple, simul
 to connect, and gives  the  user the  ability to switch between client apps at the press of a button.
 
 The Logitech G15 v1 can start at maximum keyboard brightness and use M1, M2 and
-M3 as three configurable keyd profiles. See ``Documentation/G15-PROFILES.md``.
+M3 as three configurable keyd profiles. The GTK 4 editor provides a G15-shaped
+54-key overview, typed actions, macros, bank copying and profile import/export.
+See ``Documentation/G15-PROFILES.md``.
 Build, test and portability notes are in ``Documentation/DEVELOPMENT.md``.
 
 Currently, patches to enable support for the daemon are available for libgraphlcd, which in turn enables

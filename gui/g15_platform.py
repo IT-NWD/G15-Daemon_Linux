@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -29,3 +30,14 @@ def system_apply_command(helper: Path, profile: Path, brightness: int) -> list[s
         raise OSError(f"Installationshelfer nicht gefunden: {selected_helper}")
     return [find_tool("G15_PKEXEC", "pkexec"), str(selected_helper),
             str(profile), str(brightness)]
+
+
+def local_file_path(file) -> Path:
+    if file is None or file.get_path() is None:
+        raise OSError("Es werden derzeit nur lokale Dateien unterstützt.")
+    return Path(file.get_path())
+
+
+def safe_profile_filename(name: str) -> str:
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", name.strip()).strip("-.")
+    return f"{stem or 'g15-profile'}.conf"
