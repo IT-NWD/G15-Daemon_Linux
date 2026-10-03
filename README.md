@@ -12,6 +12,7 @@ LCD und Tastaturbeleuchtung und stellt die 18 G-Tasten über drei M-Ebenen als
 ## Funktionen
 
 - LCD-Daemon mit Uhr-, Netzwerk- und UINPUT-Plugin
+- Uhr mit deutscher Datumsanzeige und festem 24-Stunden-Format
 - konfigurierbare Starthelligkeit von 0 bis 2, standardmäßig Stufe 2
 - GTK-4-Profileditor nach dem Bedienprinzip der Logitech-Windows-Software
 - 54 Belegungen für G1–G18 in den Ebenen M1, M2 und M3

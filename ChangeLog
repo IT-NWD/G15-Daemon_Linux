@@ -1,4 +1,5 @@
 Unreleased
+* Uhr-Plugin: deutsches Datum und feste 24-Stunden-Anzeige ergänzt.
 * GTK-4-Profileditor nach dem Vorbild der Windows-Anwendung für die G15 v1 ergänzt.
 * Tastenfolgen, Makros, wiederholte Makros und erweiterte keyd-Aktionen ergänzt.
 * Profilimport und -export, Kopieren von M-Ebenen und Standardbelegungen ergänzt.

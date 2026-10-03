@@ -54,10 +54,20 @@ extern double round(double);
 #define CLOCK_ENDX		(CLOCK_CENTERX+CLOCK_RADIUS+1)
 #define CLOCK_ENDY		(CLOCK_CENTERY+CLOCK_RADIUS)
 
-static int mode=1;
 static int showdate=0;
 static int digital=1;
 g15canvas *static_canvas = NULL;
+
+static const char *german_weekdays[] = {
+	"Sonntag", "Montag", "Dienstag", "Mittwoch",
+	"Donnerstag", "Freitag", "Samstag"
+};
+
+/* Spell umlauts out because the G15 bitmap font is limited to ASCII. */
+static const char *german_months[] = {
+	"Januar", "Februar", "Maerz", "April", "Mai", "Juni",
+	"Juli", "August", "September", "Oktober", "November", "Dezember"
+};
 
 /* ----------------------------------------------------------------------------
  * calc x,y for given minute/hour/sec (pos), cut_off is for radius variations
@@ -131,24 +141,19 @@ static int draw_digital(g15canvas *canvas){
 	int narrows=0;
 	int totalwidth=0;
 	char buf[10];
-	char ampm[3];
 	int height = G15_LCD_HEIGHT - 1;
 	time_t currtime = time(NULL);
 	memset(buf,0,10);
-	memset(ampm,0,3);
 	if(showdate) {
 		char buf2[40];
-		strftime(buf2,40,"%A %e %B %Y",localtime(&currtime));
+		struct tm *t = localtime(&currtime);
+		snprintf(buf2, sizeof(buf2), "%s %d. %s %d",
+			german_weekdays[t->tm_wday], t->tm_mday,
+			german_months[t->tm_mon], t->tm_year + 1900);
 		g15r_renderString (canvas,(unsigned char *)buf2 , 0, G15_TEXT_MED, 80-((strlen(buf2)*5)/2), height-6);
 		height-=10;
 	}
-	if(mode) {
-		strftime(buf,6,"%H:%M",localtime(&currtime));
-	}
-	else{
-		strftime(buf,6,"%l:%M",localtime(&currtime));
-		strftime(ampm,3,"%p",localtime(&currtime));
-	}
+	strftime(buf,6,"%H:%M",localtime(&currtime));
 	if(buf[0]==49)
 		narrows=1;
 	len = strlen(buf);
@@ -171,8 +176,6 @@ static int draw_digital(g15canvas *canvas){
 			g15r_drawBigNum (canvas, (80-(totalwidth)/2)+col*20, 1,(80-(totalwidth)/2)+(col+1)*20, height, G15_COLOR_BLACK, num);
 	}
 
-	if(ampm[0]!=0)
-		g15r_renderString (canvas,(unsigned char *)ampm,0,G15_TEXT_LARGE,totalwidth+15,height-6);
 	return G15_PLUGIN_OK;
 }
 
@@ -205,20 +208,19 @@ static int draw_analog(g15canvas *c){
 	// second:
 	g15r_drawLine(c, CLOCK_CENTERX,    CLOCK_CENTERY,   xs,  ys,   G15_COLOR_BLACK);
 	// draw texts:
-	char day[32];	// Tuesday
-	char mon[32];	// March
-	char year[32];	// 1234 AD
+	char day[32];	// Wochentag
+	char mon[32];	// Monat
+	char year[32];	// Jahr
 	char time[32];	// 22:33:44
 	char date[32];	// 21.April
 
-	strftime(day, sizeof(day), "%A", t);
-	strftime(mon, sizeof(mon), "%B", t);
+	strncpy(day, german_weekdays[t->tm_wday], sizeof(day) - 1);
+	day[sizeof(day) - 1] = '\0';
+	strncpy(mon, german_months[t->tm_mon], sizeof(mon) - 1);
+	mon[sizeof(mon) - 1] = '\0';
 	sprintf(date, "%d.%s", t->tm_mday, mon);
-	sprintf(year, "%4d AD", t->tm_year+1900);
-	if(mode)
-		strftime(time,sizeof(time),"%H:%M:%S",t);
-	else
-		strftime(time,sizeof(time),"%r",t);
+	sprintf(year, "%4d", t->tm_year+1900);
+	strftime(time,sizeof(time),"%H:%M:%S",t);
 
 	if(showdate) {
 		g15r_renderString(c, (unsigned char*)time,  0, G15_TEXT_LARGE, 60, 4);
@@ -264,10 +266,6 @@ static int myeventhandler(plugin_event_t *myevent){
 	switch (myevent->event){
 		case G15_EVENT_KEYPRESS:
 		clockcfg = g15daemon_cfg_load_section(lcd->masterlist,"Clock");
-			if(myevent->value & G15_KEY_L2){
-				mode = 1^mode;
-				g15daemon_cfg_write_bool(clockcfg, "24hrFormat", mode);
-			}
 			if(myevent->value & G15_KEY_L3) {
 				showdate = 1^showdate;
 				g15daemon_cfg_write_bool(clockcfg, "ShowDate", showdate);
@@ -296,7 +294,6 @@ static void callmewhenimdone(lcd_t *lcd){
 /* completely unnecessary initialisation function which could just as easily have been set to NULL in the g15plugin_info struct */
 static int myinithandler(lcd_t *lcd){
 	config_section_t *clockcfg = g15daemon_cfg_load_section(lcd->masterlist,"Clock");
-	mode=g15daemon_cfg_read_bool(clockcfg, "24hrFormat",1);
 	showdate=g15daemon_cfg_read_bool(clockcfg, "ShowDate",0);
 	digital=g15daemon_cfg_read_bool(clockcfg, "Digital",1);
 
